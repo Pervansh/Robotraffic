@@ -1,5 +1,6 @@
 #pragma once
 #include "AbstractWindow.h"
+#include "System.h"
 #include <Arduino.h>
 #include <Vector.h> 
 #include <LiquidCrystal_I2C.h>
@@ -7,7 +8,19 @@
 
 class String;
 
-int min(int, int);
+LiquidCrystal_I2C AbstractWindow::lcd = LiquidCrystal_I2C(0x27, 20, 4);
+Encoder AbstractWindow::encoder = Encoder(2, 3, 4, true);
+
+AbstractWindow::AbstractWindow(System* system, AbstractWindow* prev = nullptr) {
+    this->system = system;
+    this->prev = prev;
+    curr = 0;
+    isScrolling = true;
+}
+
+AbstractWindow::~AbstractWindow(){
+    flush();
+}
 
 void AbstractWindow::print(String s) {
     int ind = strings.size() - 1;
@@ -29,14 +42,15 @@ void AbstractWindow::update(String s, int ind) {
 
 void AbstractWindow::draw() {
     lcd.clear();
-    for (int j = 0, int i = min(curr, strings.size() - 4); i < min(curr + 4, strings.size()); i++, j++) {
+    int j = 0, i = min(curr, strings.size() - 4);
+    for (; i < min(curr + 4, strings.size()); i++, j++) {
         lcd.setCursor(0, j);
         lcd.print(strings[curr]);
     }
 }
 
 void AbstractWindow::onClick() {
-    closeLastWindow();
+    system->closeLastWindow();
 }
 
 void AbstractWindow::execute() {
@@ -49,11 +63,11 @@ void AbstractWindow::execute() {
 
     call();
 
-    if (isScroling) {
-        if (isRight && cur <= strings.size() - 4) {
-            cur++;
-        } else if (isLeft && cur >= 0) {
-            cur--;
+    if (isScrolling) {
+        if (isRight && curr <= strings.size() - 4) {
+            curr++;
+        } else if (isLeft && curr >= 0) {
+            curr--;
         }
     }
     

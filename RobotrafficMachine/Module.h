@@ -1,22 +1,22 @@
 #pragma once
 
-#include <CarBehavior.h>
+#include "CarBehavior.h"
+
+class CarBehavior;
 
 class Module {
 private:
     CarBehavior* behavior;
-    const int priority;
 public:
+    const int priority;
+    
     Module(CarBehavior* behavior, int prior = 64) : priority(prior) {
         this->behavior = behavior;
-        this->priority;
     }
 
     virtual void process() = 0;
 
-    int getPriority() {
-        return priority;
-    }
+    CarBehavior* getCarBehavior() {return behavior;}
 
     ~Module() {}
 };

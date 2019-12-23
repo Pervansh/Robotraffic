@@ -7,46 +7,31 @@
 #include <i2cioCommands.h>
 #include <Octoliner.h>
 
-#include <Module.h>
-#include <CarModules.h>
+#include "Module.h"
+#include "CarModules.h"
+
+class Module;
+class MoveModule;
 
 class CarBehavior {
 private:
     Servo angleServo;
     Servo speedServo;
     GyverPID* pid;
-    Vector<Module> mods;
+    Vector<Module*> mods;
     Octoliner* octoliner;
     bool isRunning;
     int speed;
     int angle;
 public:
-    CarBehavior(int angleServoPin, int speedServoPin) {
-        Servo angleServo = Servo(angleServoPin);
-        Servo speedServo = Servo(speedServoPin);
-        octoliner = new Octoliner(42);
-        pid = new GyverPID();
-        useStandartPID();
-        pid->setLimits(0, 180);
-        mods.push_back(MoveModule(this, pid));
-        isRunning = false;
-    }
+    CarBehavior(int angleServoPin, int speedServoPin);
 
-    virtual void execute() {
-        speed = 1000;
-        angle = 90;
-
-        for(Module mod : mods) {
-            mod.process();
-        }
-
-        angleServo.write(angle);
-        speedServo.write(speed);
-    }
+    virtual void execute();
     virtual void run() = 0;
     virtual void stop() = 0;
-    virtual void useStandartPID() = 0;
+    virtual void useStandartPID() {}
 
+    void addModule(Module* module);
     GyverPID* getPID() {return pid;}
     void setPID(GyverPID* pid) {this->pid = pid;}
     Octoliner* getOctoliner() {return octoliner;}
@@ -54,4 +39,6 @@ public:
     int getAngle() {return angle;}
     virtual void setSpeed(int speed) {this->speed = speed;}
     virtual void setAngle(int angle) {this->angle = angle;}
+
+    ~CarBehavior();
 };

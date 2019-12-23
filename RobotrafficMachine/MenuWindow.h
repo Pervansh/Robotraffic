@@ -1,8 +1,7 @@
 #pragma once
 
-#include "AbstractWindow.h"
-#include <Arduino.h>
 #include <Vector.h>
+#include "AbstractWindow.h"
 
 class MenuWindow : public AbstractWindow {
 public:
@@ -18,17 +17,16 @@ public:
 
         virtual void onClick() = 0;
         virtual void onHold() {}
+        MenuWindow* getMenu() {return menu;}
     };
 
     class ReturnItem : public Item {
         public:
             ReturnItem(MenuWindow* menu) : Item(menu) {
-                menu->println(" Return");
+                getMenu()->println(" Return");
             }
 
-            void onClick() {
-                menu->getSystem()->closeLastWindow();
-            }
+            void onClick();
     };
 
     class FloatValueItem : public Item {
@@ -37,44 +35,33 @@ public:
             float* value;
             String valueName;
         public:
-            ReturnItem(MenuWindow* menu, float var, String valueName) : Item(menu) {
+            FloatValueItem(MenuWindow* menu, float var, String valueName) : Item(menu) {
                 this->value = &var;
                 this->valueName = valueName;
-                menu->println(' ' + valueName + ": " + (String)value);
+                getMenu()->println(' ' + valueName + ": " + (String)*value);
             }
 
-            void onClick() {
-                if (state) {
-                    menu->setHoldingItem(nullptr);
-                } else {
-                    menu->setHoldingItem(this);
-                }
-                state = !state;
-            }
+            void onClick();
             
-            void onHold() override {
-                if (menu->isTurnedRight()) {
-                    *value += 0.05f; 
-                } else if (menu->isTurnedLeft()) {
-                    *value -= 0.05f;
-                }
-            }
+            void onHold() override;
     };
 
 protected:
-    Vector<Item> items;
+    Vector<Item*> items;
     Item* holdingItem;
     int curItem = 0;
 
 public:
+    MenuWindow(System* system, AbstractWindow* prev = nullptr) : AbstractWindow(system, prev) {}
+    
     virtual void call();
     
     virtual void onClick() override {
-        items[curItem].onClick();
+        items[curItem]->onClick();
     }
 
-    void addItem(Item item) {
-        item.ind = items.size();
+    void addItem(Item* item) {
+        item->ind = items.size();
         items.push_back(item);
     }
 
@@ -84,8 +71,8 @@ public:
     }
 
     ~MenuWindow() {
-        for (Item item : items) {
-            delete item;
+        for (int i = 0; i < items.size(); i++) {
+            delete items[i];
         }
     }
 };

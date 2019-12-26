@@ -3,7 +3,7 @@
 #include "System.h"
 
 void MenuWindow::ReturnItem::onClick() {
-    getMenu()->getSystem()->closeLastWindow();
+    getMenu()->close();
 }
 
 void MenuWindow::FloatValueItem::onClick() {
@@ -16,25 +16,45 @@ void MenuWindow::FloatValueItem::onClick() {
 }
 
 void MenuWindow::FloatValueItem::onHold(){
-    if (getMenu()->isTurnedRight()) {
-        *value += 0.05f; 
-    } else if (getMenu()->isTurnedLeft()) {
+    if (getMenu()->isTurnedLeft()) {
+        *value += 0.05f;
+        getMenu()->update(' ' + valueName + ": " + (String)*value, ind);
+        getMenu()->draw();
+    } else if (getMenu()->isTurnedRight()) {
         *value -= 0.05f;
+        getMenu()->update(' ' + valueName + ": " + (String)*value, ind);
+        getMenu()->draw();
     }
-    getMenu()->update('\x84' + valueName + ": " + (String)*value, ind);
 }
 
 void MenuWindow::call() {
     if (holdingItem) {
         holdingItem->onHold();
     } else {
-        update('\x84' + strings[curItem].substring(1, strings[curItem].length() - 1), items[curItem]->ind);
-        if (isRight && curItem < items.size()) {
-            update(' ' + strings[curItem].substring(1, strings[curItem].length() - 1), items[curItem]->ind);
+        if (isTurnedLeft() && curItem < items.size() - 1) {
             curItem++;
-        } else if (isLeft && curItem >= 0) {
-            update(' ' + strings[curItem].substring(1, strings[curItem].length() - 1), items[curItem]->ind);
+            curr = max(curr, curItem - 3);
+            draw();
+        } else if (isTurnedRight() && curItem > 0) {
             curItem--;
+            curr = min(curr, curItem);
+            draw();
         }
+    }
+}
+
+void MenuWindow::draw() {
+    AbstractWindow::draw();
+    getLCD()->setCursor(0, curItem - curr);
+    getLCD()->print(">");
+}
+
+void MenuWindow::readCommand(String msg) {
+    if (msg.equals(">")) {
+        onClick();
+    } else if (holdingItem == nullptr) {
+        AbstractWindow::readCommand(msg);
+        int ind = msg.toInt() - 1;
+        curItem = constrain(ind, 0, items.size() - 1);
     }
 }

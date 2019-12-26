@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Arduino.h>
 #include <Vector.h>
 #include "AbstractWindow.h"
 
@@ -35,10 +36,14 @@ public:
             float* value;
             String valueName;
         public:
-            FloatValueItem(MenuWindow* menu, float var, String valueName) : Item(menu) {
-                this->value = &var;
+            FloatValueItem(MenuWindow* menu, float* var, String valueName) : Item(menu) {
+                Serial.println("FVI: s");
+                this->value = var;
+                Serial.println("FVI: var");
                 this->valueName = valueName;
+                Serial.println("FVI: vn");
                 getMenu()->println(' ' + valueName + ": " + (String)*value);
+                Serial.println("FVI: e");
             }
 
             void onClick();
@@ -52,27 +57,36 @@ protected:
     int curItem = 0;
 
 public:
-    MenuWindow(System* system, AbstractWindow* prev = nullptr) : AbstractWindow(system, prev) {}
+    MenuWindow(System* system, AbstractWindow* prev = nullptr) : AbstractWindow(system, prev) {
+        holdingItem = nullptr;
+        useScrolling(false);
+    }
     
     virtual void call();
+    virtual void draw();
+    virtual void readCommand(String);
     
     virtual void onClick() override {
-        items[curItem]->onClick();
+        if (items.size() > 0) {
+            items[curItem]->onClick();
+        }
     }
 
     void addItem(Item* item) {
         item->ind = items.size();
         items.push_back(item);
+        draw();
     }
 
     void setHoldingItem(Item* item) {
         holdingItem = item;
-        useScrolling(!item);
+        //useScrolling(!item);
     }
 
     ~MenuWindow() {
         for (int i = 0; i < items.size(); i++) {
             delete items[i];
+            Serial.println("MN - delete[" + (String)i + "]");
         }
     }
 };

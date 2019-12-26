@@ -11,14 +11,21 @@ class System;
 class AbstractWindow {
 private:
     AbstractWindow* prev;
-    static LiquidCrystal_I2C lcd;
-    static Encoder encoder;
+    static LiquidCrystal_I2C* lcd;
+    static Encoder* encoder;
+    long drawTimer;
+    long drawDelta;
+    bool isDrawOnTimer;
+    bool isClosing = false;
+    bool isRight = false, isLeft = false, isFastL = false, isFastR = false;
+    bool isLeftIgnore = false, isRightIgnore = false;
+    int leftCounter = 0;
+    int rightCounter = 0;
 
 protected:
     System* system;
     Vector<String> strings;
     int curr;
-    bool isRight = false, isLeft = false;
     bool isScrolling;
     virtual void onClick();
     virtual void call() = 0;
@@ -34,15 +41,19 @@ public:
     void println(String);
     void update(String, int);
     virtual void draw();
+    virtual void close();
 
-    void useScrolling(bool b) {
-        isScrolling = b;
-    }
-
-    bool isTurnedRight() {return isRight;}
-    bool isTurnedLeft() {return isLeft;}
+    virtual void readCommand(String);
+    void useScrolling(bool b) {isScrolling = b;}
+    void useDrawOnTimer(bool use) {isDrawOnTimer = use;}
+    void setDrawDelta(long dd) {drawDelta = dd;}
+    bool isTurnedRight() {return rightCounter >= 2;}
+    bool isTurnedLeft() {return leftCounter >= 2;}
+    bool isFastTurnedRight() {return isFastR;}
+    bool isFastTurnedLeft() {return isFastL;}
     System* getSystem() {return system;}
-    static LiquidCrystal_I2C* getLCD() {return &lcd;}
+    static LiquidCrystal_I2C* getLCD() {return lcd;}
+    static Encoder* getEncoder() {return encoder;}
     AbstractWindow* getPreviousWindow() {return prev;}
 
 };

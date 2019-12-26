@@ -1,5 +1,8 @@
 #pragma once
 
+#include <Arduino.h>
+
+class String;
 class AbstractWindow;
 class CarBehavior;
 
@@ -9,14 +12,21 @@ private:
     AbstractWindow* window;
 public:
 
-    System(CarBehavior*, AbstractWindow*);
+    System();
 
     void execute();
 
-    void setCarBehavior(CarBehavior* behavior) {this->behavior = behavior;}
+    void checkSerialMessage(String);
+    void setCarBehavior(CarBehavior* behavior) {
+        if (this->behavior) {
+            delete this->behavior;
+        }
+        this->behavior = behavior;
+        Serial.println("Behavior was changed");
+    }
     CarBehavior* getCarBehavior() {return behavior;}
     AbstractWindow* getLastWindow() {return window;}
-    void openWindow(AbstractWindow* window) {this->window = window;}
+    void openWindow(AbstractWindow*);
 
     void closeLastWindow();
 };

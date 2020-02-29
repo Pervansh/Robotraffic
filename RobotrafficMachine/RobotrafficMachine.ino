@@ -4,6 +4,9 @@
 #include "MenuWindow.h"
 #include "MainMenu.h"
 #include "PIDMenu.h"
+#include "CarModules.h"
+
+
 
 float a = 20;
 
@@ -52,16 +55,15 @@ void setup() {
     Serial.begin(9600);
     //pervansh::system = new System(new EmptyBehavior(10, 11), new MainMenu(pervansh::system));
     pervansh::system = new System();
-    Serial.println("setup - sys: " + (String)((int)pervansh::system));
-    pervansh::system->setCarBehavior(new EmptyBehavior(10, 11));
+    CarBehavior* cb = new EmptyBehavior();
+    cb->addModule(new SharpModule(cb));
+    pervansh::system->setCarBehavior(cb);
+    delay(500);
     MainMenu* mm = new MainMenu(pervansh::system);
-    Serial.println("setup - MM: " + (String)((int)mm));
     pervansh::system->openWindow(mm);
-    Serial.println("SETUP!");
 }
 
 void loop() {
-    //Serial.println("loop");
     pervansh::system->execute();
     if (stringComplete) {
         Serial.println("msg: " + inputString);

@@ -19,11 +19,11 @@ void MenuWindow::FloatValueItem::onHold(){
     if (getMenu()->isTurnedLeft()) {
         *value += 0.05f;
         getMenu()->update(' ' + valueName + ": " + (String)*value, ind);
-        getMenu()->draw();
+        getMenu()->drawItem(ind);
     } else if (getMenu()->isTurnedRight()) {
         *value -= 0.05f;
         getMenu()->update(' ' + valueName + ": " + (String)*value, ind);
-        getMenu()->draw();
+        getMenu()->drawItem(ind);
     }
 }
 
@@ -47,6 +47,14 @@ void MenuWindow::draw() {
     AbstractWindow::draw();
     getLCD()->setCursor(0, curItem - curr);
     getLCD()->print(">");
+}
+
+void MenuWindow::draw(int ind) {
+    AbstractWindow::draw(ind);
+    if (ind == curItem) {
+        getLCD()->setCursor(0, curItem - curr);
+        getLCD()->print(">");
+    }
 }
 
 void MenuWindow::readCommand(String msg) {

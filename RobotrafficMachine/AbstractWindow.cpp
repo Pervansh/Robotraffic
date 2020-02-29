@@ -1,4 +1,3 @@
-#pragma once
 #include "AbstractWindow.h"
 #include "System.h"
 #include <Arduino.h>
@@ -7,10 +6,15 @@
 #include <GyverEncoder.h>
 
 class String;
-uint8_t attachPCINT(uint8_t);
+
+#if defined(__AVR_ATmega328__)
+    uint8_t attachPCINT(uint8_t);
+#endif
 
 LiquidCrystal_I2C* AbstractWindow::lcd = nullptr;
 Encoder* AbstractWindow::encoder = nullptr;
+
+
 
 AbstractWindow::AbstractWindow(System* system, AbstractWindow* prev = nullptr) {
     this->system = system;
@@ -21,16 +25,22 @@ AbstractWindow::AbstractWindow(System* system, AbstractWindow* prev = nullptr) {
         lcd->backlight();
     }
     if (!encoder) {
-        encoder = new Encoder(2, 3, 4, false);  //false - double turn, true - bad left working
+        encoder = new Encoder(29, 34, 35, false);  //false - double turn, true - bad left working
+    }
+    if (encoder->isClick()) {
+        encoder->tick();
     }
     curr = 0;
     isScrolling = true;
     isDrawOnTimer = false;
     drawTimer = 0;
     drawDelta = 300;
+    
     // настроить PCINT
-    attachPCINT(2); //cl
-    attachPCINT(3); //dt
+    #if defined(__AVR_ATmega328__)
+        attachPCINT(2); //cl
+        attachPCINT(3); //dt
+    #endif
     draw();
 }
 
@@ -62,6 +72,17 @@ void AbstractWindow::draw() {
     for (; i < min(curr + 4, strings.size()); i++, j++) {
         lcd->setCursor(0, j);
         lcd->print(strings[i]);
+    }
+}
+
+void AbstractWindow::draw(int ind) {
+    if (ind >= 0 && ind < 4 && ind + curr < strings.size()) {
+        String str = strings[curr + ind];
+        for (int i = strings[ind].length(); i < 20; i++) {
+            str += ' ';
+        }
+        lcd->setCursor(0, ind);
+        lcd->print(str);
     }
 }
 
@@ -124,6 +145,7 @@ void AbstractWindow::execute() {
     }
 }
 
+#if defined(__AVR_ATmega328__)
 // функция для настройки PCINT для ATmega328 (UNO, Nano, Pro Mini)
 uint8_t attachPCINT(uint8_t pin) {
   if (pin < 8) { // D0-D7 // PCINT2
@@ -157,3 +179,5 @@ ISR(PCINT1_vect) {
 ISR(PCINT2_vect) {
   AbstractWindow::getEncoder()->tick();
 }
+
+#endif

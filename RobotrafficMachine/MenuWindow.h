@@ -19,6 +19,8 @@ public:
         virtual void onClick() = 0;
         virtual void onHold() {}
         MenuWindow* getMenu() {return menu;}
+
+        virtual ~Item() = default;
     };
 
     class ReturnItem : public Item {
@@ -37,13 +39,9 @@ public:
             String valueName;
         public:
             FloatValueItem(MenuWindow* menu, float* var, String valueName) : Item(menu) {
-                Serial.println("FVI: s");
                 this->value = var;
-                Serial.println("FVI: var");
                 this->valueName = valueName;
-                Serial.println("FVI: vn");
                 getMenu()->println(' ' + valueName + ": " + (String)*value);
-                Serial.println("FVI: e");
             }
 
             void onClick();
@@ -64,12 +62,17 @@ public:
     
     virtual void call();
     virtual void draw();
+    virtual void draw(int);
     virtual void readCommand(String);
     
     virtual void onClick() override {
         if (items.size() > 0) {
             items[curItem]->onClick();
         }
+    }
+
+    void drawItem(int ind) {
+        draw(ind - curr);
     }
 
     void addItem(Item* item) {
@@ -86,7 +89,6 @@ public:
     ~MenuWindow() {
         for (int i = 0; i < items.size(); i++) {
             delete items[i];
-            Serial.println("MN - delete[" + (String)i + "]");
         }
     }
 };

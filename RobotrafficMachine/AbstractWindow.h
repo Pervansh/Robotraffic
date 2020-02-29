@@ -33,14 +33,13 @@ protected:
 public:
     AbstractWindow(System* system, AbstractWindow* prev = nullptr);
 
-    ~AbstractWindow();
-
     void execute(); // reading info, uses call-function
     void flush();
     void print(String);
     void println(String);
     void update(String, int);
     virtual void draw();
+    virtual void draw(int);
     virtual void close();
 
     virtual void readCommand(String);
@@ -56,4 +55,5 @@ public:
     static Encoder* getEncoder() {return encoder;}
     AbstractWindow* getPreviousWindow() {return prev;}
 
+    virtual ~AbstractWindow();
 };

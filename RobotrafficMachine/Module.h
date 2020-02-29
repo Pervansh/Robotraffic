@@ -1,10 +1,11 @@
 #pragma once
 
 #include "CarBehavior.h"
+#include "Subscriber.h"
 
 class CarBehavior;
 
-class Module {
+class Module : Subscriber {
 private:
     CarBehavior* behavior;
 public:
@@ -16,7 +17,9 @@ public:
 
     virtual void process() = 0;
 
+    virtual void update(CarBehavior* behavior, CarBehavior::ListnerType type){}
+
     CarBehavior* getCarBehavior() {return behavior;}
 
-    ~Module() {}
+    virtual ~Module() = default;
 };

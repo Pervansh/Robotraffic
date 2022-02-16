@@ -1,36 +1,47 @@
-#pragma once
 #include "AbstractWindow.h"
 #include "System.h"
 #include <Arduino.h>
 #include <Vector.h> 
 #include <LiquidCrystal_I2C.h>
 #include <GyverEncoder.h>
+#include "config.h"
 
 class String;
-uint8_t attachPCINT(uint8_t);
+
+#if defined(__AVR_ATmega328__)
+    uint8_t attachPCINT(uint8_t);
+#endif
 
 LiquidCrystal_I2C* AbstractWindow::lcd = nullptr;
 Encoder* AbstractWindow::encoder = nullptr;
+
+
 
 AbstractWindow::AbstractWindow(System* system, AbstractWindow* prev = nullptr) {
     this->system = system;
     this->prev = prev;
     if (!lcd) {
-        lcd = new LiquidCrystal_I2C(0x27, 20, 4);
+        lcd = new LiquidCrystal_I2C(0x38, config::lcdColumnCount, config::lcdRowCount);
         lcd->init();
         lcd->backlight();
     }
     if (!encoder) {
-        encoder = new Encoder(2, 3, 4, false);  //false - double turn, true - bad left working
+        encoder = new Encoder(29, 34, 35, true);  //false - double turn, true - bad left working
+    }
+    if (encoder->isClick()) {
+        encoder->tick();
     }
     curr = 0;
     isScrolling = true;
     isDrawOnTimer = false;
     drawTimer = 0;
     drawDelta = 300;
+    
     // настроить PCINT
-    attachPCINT(2); //cl
-    attachPCINT(3); //dt
+    #if defined(__AVR_ATmega328__)
+        attachPCINT(2); //cl
+        attachPCINT(3); //dt
+    #endif
     draw();
 }
 
@@ -58,10 +69,21 @@ void AbstractWindow::update(String s, int ind) {
 
 void AbstractWindow::draw() {
     lcd->clear();
-    int j = 0, i = max(min(curr, strings.size() - 4), 0);
-    for (; i < min(curr + 4, strings.size()); i++, j++) {
+    int j = 0, i = max(min(curr, strings.size() - config::lcdRowCount), 0);
+    for (; i < min(curr + config::lcdRowCount, strings.size()); i++, j++) {
         lcd->setCursor(0, j);
         lcd->print(strings[i]);
+    }
+}
+
+void AbstractWindow::draw(int ind) {
+    if (ind >= 0 && ind < config::lcdRowCount && ind + curr < strings.size()) {
+        String str = strings[curr + ind];
+        for (int i = strings[ind].length(); i < config::lcdColumnCount; i++) {
+            str += ' ';
+        }
+        lcd->setCursor(0, ind);
+        lcd->print(str);
     }
 }
 
@@ -72,7 +94,7 @@ void AbstractWindow::onClick() {
 void AbstractWindow::readCommand(String msg) {
     int ind = msg.toInt() - 1;
     if (isScrolling) {
-        curr = constrain(ind, 0, strings.size() - 4);
+        curr = constrain(ind, 0, strings.size() - config::lcdRowCount);
     }
 }
 
@@ -102,7 +124,7 @@ void AbstractWindow::execute() {
     call();
 
     if (isScrolling) {
-        if (isTurnedLeft() && curr < strings.size() - 4) {
+        if (isTurnedLeft() && curr < strings.size() - config::lcdRowCount) {
             curr++;
             draw();
         } else if (isTurnedRight() && curr > 0) {
@@ -116,14 +138,15 @@ void AbstractWindow::execute() {
         draw();
     }
 
-    leftCounter = leftCounter % 2;
-    rightCounter = rightCounter % 2;
+    leftCounter = leftCounter % MIN_TURN_LEFT_TRIGGER;
+    rightCounter = rightCounter % MIN_TURN_RIGHT_TRIGGER;
 
     if (isClosing) {
         system->closeLastWindow();
     }
 }
 
+#if defined(__AVR_ATmega328__)
 // функция для настройки PCINT для ATmega328 (UNO, Nano, Pro Mini)
 uint8_t attachPCINT(uint8_t pin) {
   if (pin < 8) { // D0-D7 // PCINT2
@@ -157,3 +180,5 @@ ISR(PCINT1_vect) {
 ISR(PCINT2_vect) {
   AbstractWindow::getEncoder()->tick();
 }
+
+#endif

@@ -17,13 +17,7 @@ public:
     void execute();
 
     void checkSerialMessage(String);
-    void setCarBehavior(CarBehavior* behavior) {
-        if (this->behavior) {
-            delete this->behavior;
-        }
-        this->behavior = behavior;
-        Serial.println("Behavior was changed");
-    }
+    void setCarBehavior(CarBehavior* behavior);
     CarBehavior* getCarBehavior() {return behavior;}
     AbstractWindow* getLastWindow() {return window;}
     void openWindow(AbstractWindow*);

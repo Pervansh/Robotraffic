@@ -19,36 +19,38 @@ public:
         virtual void onClick() = 0;
         virtual void onHold() {}
         MenuWindow* getMenu() {return menu;}
+
+        virtual ~Item() = default;
     };
 
     class ReturnItem : public Item {
         public:
             ReturnItem(MenuWindow* menu) : Item(menu) {
-                getMenu()->println(" Return");
+                getMenu()->println("Return");
             }
 
-            void onClick();
+            virtual void onClick();
     };
 
     class FloatValueItem : public Item {
         private:
             bool state = false;
             float* value;
+            float delta;
             String valueName;
         public:
-            FloatValueItem(MenuWindow* menu, float* var, String valueName) : Item(menu) {
-                Serial.println("FVI: s");
+            FloatValueItem(MenuWindow* menu, float* var, float changeDelta, String valueName) : Item(menu) {
                 this->value = var;
-                Serial.println("FVI: var");
+                this->delta = changeDelta;
                 this->valueName = valueName;
-                Serial.println("FVI: vn");
-                getMenu()->println(' ' + valueName + ": " + (String)*value);
-                Serial.println("FVI: e");
+                getMenu()->println(valueName + ": " + (String)*value);
             }
 
-            void onClick();
+            virtual void onClick();
             
-            void onHold() override;
+            virtual void onHold() override;
+
+            virtual void updateData();
     };
 
 protected:
@@ -63,13 +65,21 @@ public:
     }
     
     virtual void call();
+    virtual void print(String);
+    virtual void println(String);
+    virtual void update(String, int);
     virtual void draw();
+    virtual void draw(int);
     virtual void readCommand(String);
     
     virtual void onClick() override {
         if (items.size() > 0) {
             items[curItem]->onClick();
         }
+    }
+
+    void drawItem(int ind) {
+        draw(ind - curr);
     }
 
     void addItem(Item* item) {
@@ -82,11 +92,12 @@ public:
         holdingItem = item;
         //useScrolling(!item);
     }
+    
+    Item* getHoldingItem() {return holdingItem;}
 
     ~MenuWindow() {
         for (int i = 0; i < items.size(); i++) {
             delete items[i];
-            Serial.println("MN - delete[" + (String)i + "]");
         }
     }
 };

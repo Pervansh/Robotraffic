@@ -1,44 +1,81 @@
 #pragma once
 #include <Arduino.h>
+#include <inttypes.h>
 #include <Servo.h>
 #include <GyverPID.h>
 #include <Vector.h>
 #include <GpioExpander.h>
 #include <i2cioCommands.h>
 #include <Octoliner.h>
-
-#include "Module.h"
-#include "CarModules.h"
+#include "config.h"
 
 class Module;
 class MoveModule;
+class Subscriber;
 
 class CarBehavior {
+public:
+    enum class ListnerType : uint8_t {
+        onRun,
+        onStop,
+        onExcecute,
+        onRunning,
+        onDelete
+    };
+
+    const uint8_t ListnerTypeAmount = 5;
+
 private:
     Servo angleServo;
     Servo speedServo;
     GyverPID* pid;
     Vector<Module*> mods;
-    Octoliner* octoliner;
+    Vector<Subscriber*>* listners;
+    Octoliner* leftOctoliner;
+    Octoliner* rightOctoliner;
     bool isRunning;
-    int speed;
-    int angle;
+    float speed;
+    float enginePower;
+    uint8_t speedPriority;
+    float angle;
+    uint8_t anglePriority;
 public:
-    CarBehavior(int angleServoPin, int speedServoPin);
+    const int indP, indI, indD;
+    const float midAngle = 102;
+    
+    CarBehavior(int iP, int iI, int iD);
 
     virtual void execute();
-    virtual void run() = 0;
-    virtual void stop() = 0;
-    virtual void useStandartPID() {}
+    virtual void run();
+    virtual void stop();
+    virtual void useStandartPID();
+    virtual void resetPID();
+    void calibrateSpeedServo();
 
     void addModule(Module* module);
+    void safePidInEeprom();         // Doesn't work
+    void notifySubscribers(ListnerType);
+    void subscribe(Subscriber*, ListnerType);
+    
     GyverPID* getPID() {return pid;}
     void setPID(GyverPID* pid) {this->pid = pid;}
-    Octoliner* getOctoliner() {return octoliner;}
-    int getSpeed() {return speed;}
-    int getAngle() {return angle;}
-    virtual void setSpeed(int speed) {this->speed = speed;}
-    virtual void setAngle(int angle) {this->angle = angle;}
+    Octoliner* getLeftOctoliner() {return leftOctoliner;}
+    Octoliner* getRightOctoliner() {return rightOctoliner;}
+    bool wasRunning() {return isRunning;}
+    float getSpeed() {return speed;}
+    float getEnginePower() {return enginePower;}
+    float getAngle() {return angle;}
+    virtual void changeSpeed(float speed, uint8_t priority) {
+        if (priority >= speedPriority){
+            this->speed = speed;
+        }
+    }
+    virtual void setEnginePower(float power) {enginePower = power;}
+    virtual void changeAngle(float angle, uint8_t priority) {
+        if (priority >= anglePriority){
+            this->angle = angle;
+        }
+    }
 
-    ~CarBehavior();
+    virtual ~CarBehavior();
 };

@@ -4,9 +4,5 @@
 
 class EmptyBehavior : public CarBehavior {
 public:
-    EmptyBehavior(int angleServoPin, int speedServoPin)
-    : CarBehavior(angleServoPin, speedServoPin) {}
-    
-    void run() {}
-    void stop() {}
+    EmptyBehavior() : CarBehavior(0, 4, 8) {}
 };

@@ -5,6 +5,9 @@
 #include <LiquidCrystal_I2C.h>
 #include <GyverEncoder.h>
 
+#define MIN_TURN_LEFT_TRIGGER 1  // 2
+#define MIN_TURN_RIGHT_TRIGGER 1  // 2
+
 class String;
 class System;
 
@@ -33,22 +36,21 @@ protected:
 public:
     AbstractWindow(System* system, AbstractWindow* prev = nullptr);
 
-    ~AbstractWindow();
-
     void execute(); // reading info, uses call-function
     void flush();
-    void print(String);
-    void println(String);
-    void update(String, int);
+    virtual void print(String);
+    virtual void println(String);
+    virtual void update(String, int);
     virtual void draw();
+    virtual void draw(int);
     virtual void close();
 
     virtual void readCommand(String);
     void useScrolling(bool b) {isScrolling = b;}
     void useDrawOnTimer(bool use) {isDrawOnTimer = use;}
     void setDrawDelta(long dd) {drawDelta = dd;}
-    bool isTurnedRight() {return rightCounter >= 2;}
-    bool isTurnedLeft() {return leftCounter >= 2;}
+    bool isTurnedRight() {return rightCounter >= MIN_TURN_RIGHT_TRIGGER;}
+    bool isTurnedLeft() {return leftCounter >= MIN_TURN_LEFT_TRIGGER;}
     bool isFastTurnedRight() {return isFastR;}
     bool isFastTurnedLeft() {return isFastL;}
     System* getSystem() {return system;}
@@ -56,4 +58,5 @@ public:
     static Encoder* getEncoder() {return encoder;}
     AbstractWindow* getPreviousWindow() {return prev;}
 
+    virtual ~AbstractWindow();
 };

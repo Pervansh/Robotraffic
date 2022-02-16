@@ -3,25 +3,26 @@
 #include "PIDMenu.h"
 #include "System.h"
 #include "CarBehavior.h"
+#include "config.h"
 
 class LaunchCarItem : public MenuWindow::Item {
 private:
     bool state = false;
 public:
     LaunchCarItem(MenuWindow* menu) : MenuWindow::Item(menu) {
-        getMenu()->println(" Launch: OFF");
+        getMenu()->println("Launch: OFF");
     }
      
     void onClick(){
         if (state) {
             getMenu()->setHoldingItem(nullptr);
             getMenu()->getSystem()->getCarBehavior()->stop();
-            getMenu()->update(" Launch: OFF", ind);
+            getMenu()->update("Launch: OFF", ind);
             getMenu()->draw();
         } else {
             getMenu()->setHoldingItem(this);
             getMenu()->getSystem()->getCarBehavior()->run();
-            getMenu()->update(" Launch: ON", ind);
+            getMenu()->update("Launch: ON", ind);
             getMenu()->draw();
         }
         state = !state;
@@ -31,7 +32,7 @@ public:
 class OpenPIDMenuItem : public MenuWindow::Item {
 public:
     OpenPIDMenuItem(MenuWindow* menu) : MenuWindow::Item(menu) {
-        getMenu()->println(" PID Settings");
+        getMenu()->println("PID Settings");
     }
            
     void onClick() {
@@ -43,14 +44,10 @@ public:
 class TextWindow : public AbstractWindow {
 public:
     TextWindow(System* system, AbstractWindow* prev = nullptr) : AbstractWindow(system, prev){
-        println("1");
-        println("2");
-        println("3");
-        println("4");
-        println("5");
-        println("6");
-        println("7");
-        println("8");
+        println("Robotraffic MACHINE");
+        println("Software by Pervansh");
+        println("2020, ORT 1540");
+        println("--------------------");
     }
 
     void call() {}
@@ -59,7 +56,7 @@ public:
 class OpenTextItem : public MenuWindow::Item {
 public:
     OpenTextItem(MenuWindow* menu) : MenuWindow::Item(menu) {
-        getMenu()->println(" Text");
+        getMenu()->println("About");
     }
            
     void onClick() {
@@ -69,6 +66,8 @@ public:
 };
 
 MainMenu::MainMenu(System* system, AbstractWindow* prev = nullptr) : MenuWindow(system, prev) {
+    enginePowerItem = new EnginePowerItem(this);
+    addItem(enginePowerItem);
     addItem(new LaunchCarItem(this));
     addItem(new OpenPIDMenuItem(this));
     addItem(new OpenTextItem(this));

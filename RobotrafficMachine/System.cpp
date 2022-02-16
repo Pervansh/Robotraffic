@@ -3,6 +3,7 @@
 #include "AbstractWindow.h"
 #include "MainMenu.h"
 #include "CarBehavior.h"
+#include "CarStatistics.h"
 
 System::System() {
     window = nullptr;
@@ -10,9 +11,9 @@ System::System() {
 }
 
 void System::execute() {
-    //behavior->execute();
+    behavior->execute();
     window->execute();
-    //Serial.println("system - execute");
+    Serial.println("system - execute");
 }
 
 void System::checkSerialMessage(String msg) {
@@ -40,3 +41,13 @@ void System::closeLastWindow() {
         window->draw();
     }
 }
+
+void System::setCarBehavior(CarBehavior* behavior) {
+        /* if (this->behavior) {
+            delete this->behavior;
+        } */
+        this->behavior = behavior;
+        behavior->calibrateSpeedServo();
+        //behavior->subscribe(new CarStatistics(), CarBehavior::ListnerType::onExcecute);
+        Serial.println("Behavior was changed");
+    }

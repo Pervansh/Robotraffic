@@ -13,7 +13,7 @@ System::System() {
 void System::execute() {
     behavior->execute();
     window->execute();
-    Serial.println("system - execute");
+    // Serial.println("system - execute");
 }
 
 void System::checkSerialMessage(String msg) {

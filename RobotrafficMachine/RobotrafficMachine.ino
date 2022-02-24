@@ -1,10 +1,19 @@
-/#include "System.h"
+#include "System.h"
 #include "EmptyBehavior.h"
 #include "AbstractWindow.h"
 #include "MenuWindow.h"
 #include "MainMenu.h"
 #include "PIDMenu.h"
 #include "CarModules.h"
+
+/*
+ * Проблема с отображением меню: пустой массив строк, м.б. они не сохраняются
+ * Решение:
+ * + 1) Создать статический массив хранения для вектора
+ * + 2) Добавить setStorage в конструкторе
+ */
+
+// #define POLIDOROS_VECTOR
 
 namespace pervansh {
     System* system;

@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "MenuWindow.h"
 #include "MainMenu.h"
 #include "PIDMenu.h"

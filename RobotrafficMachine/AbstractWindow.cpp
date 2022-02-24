@@ -36,6 +36,10 @@ AbstractWindow::AbstractWindow(System* system, AbstractWindow* prev = nullptr) {
     isDrawOnTimer = false;
     drawTimer = 0;
     drawDelta = 300;
+
+    #ifdef POLIDOROS_VECTOR
+        strings.setStorage(stringStorage);
+    #endif
     
     // настроить PCINT
     #if defined(__AVR_ATmega328__)
@@ -55,11 +59,18 @@ void AbstractWindow::print(String s) {
 }
 
 void AbstractWindow::println(String s) {
+    Serial.println("Pushing string: " + s);
+    int ind = strings.size() - 1;
     strings.push_back(s);
 }
 
 void AbstractWindow::flush() {
     strings = Vector<String>();
+
+    #ifdef POLIDOROS_VECTOR
+        strings.setStorage(stringStorage);
+    #endif
+    
     lcd->clear();
 }
 
@@ -73,6 +84,7 @@ void AbstractWindow::draw() {
     for (; i < min(curr + config::lcdRowCount, strings.size()); i++, j++) {
         lcd->setCursor(0, j);
         lcd->print(strings[i]);
+        Serial.println("Printing: " + strings[i]);
     }
 }
 

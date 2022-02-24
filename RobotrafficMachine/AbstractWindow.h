@@ -33,6 +33,11 @@ protected:
     virtual void onClick();
     virtual void call() = 0;
 
+    #ifdef POLIDOROS_VECTOR
+        const int MAX_STRINGS = 32;
+        String stringStorage[MAX_STRINGS];
+    #endif
+
 public:
     AbstractWindow(System* system, AbstractWindow* prev = nullptr);
 

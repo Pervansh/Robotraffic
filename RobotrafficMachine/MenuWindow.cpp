@@ -40,10 +40,12 @@ void MenuWindow::call() {
             curItem++;
             curr = max(curr, curItem - config::lcdRowCount + 1);
             draw();
+            Serial.println("Down!");
         } else if (isTurnedRight() && curItem > 0) {
             curItem--;
             curr = min(curr, curItem);
             draw();
+            Serial.println("Up!");
         }
     }
 }
@@ -62,7 +64,9 @@ void MenuWindow::update(String s, int ind) {
 }
 
 void MenuWindow::draw() {
+    Serial.println("predraw");
     AbstractWindow::draw();
+    Serial.println("postdraw");
     getLCD()->setCursor(0, curItem - curr);
     getLCD()->print(">");
 }

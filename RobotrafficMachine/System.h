@@ -10,8 +10,8 @@ class System {
 private:
     CarBehavior* behavior;
     AbstractWindow* window;
-public:
 
+public:
     System();
 
     void execute();

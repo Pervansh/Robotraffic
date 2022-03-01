@@ -47,7 +47,7 @@ public:
     TextWindow(System* system, AbstractWindow* prev = nullptr) : AbstractWindow(system, prev){
         println("Robotraffic MACHINE");
         println("Software by Pervansh");
-        println("2020, ORT 1540");
+        println("2020-2022, ORT 1540");
         println("--------------------");
     }
 

@@ -46,6 +46,7 @@ AbstractWindow::AbstractWindow(System* system, AbstractWindow* prev = nullptr) {
         attachPCINT(2); //cl
         attachPCINT(3); //dt
     #endif
+    
     draw();
 }
 

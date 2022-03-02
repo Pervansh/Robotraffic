@@ -40,10 +40,10 @@ private:
     float angle;
     uint8_t anglePriority;
 public:
-    const int indP, indI, indD;
+    uint16_t* pidAddresses;
     const float midAngle = 102;
     
-    CarBehavior(int iP, int iI, int iD);
+    CarBehavior(uint16_t* _pidAddresses);
 
     virtual void execute();
     virtual void run();
@@ -54,6 +54,7 @@ public:
 
     void addModule(Module* module);
     void safePidInEeprom();         // Doesn't work
+    void takePidFromEeprom();       // Doesn't work
     void notifySubscribers(ListnerType);
     void subscribe(Subscriber*, ListnerType);
     

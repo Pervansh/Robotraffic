@@ -6,7 +6,7 @@
 #include "Subscriber.h"
 #include "CarModules.h"
 
-CarBehavior::CarBehavior(int iP = 0, int iI = 4, int iD = 8) : indP(iP), indI(iI), indD(iD) {
+CarBehavior::CarBehavior(uint16_t* _pidAddresses) : pidAddresses(_pidAddresses) {
     angleServo.attach(config::angleServoPin);
     speedServo.attach(config::speedServoPin);
     Wire.begin();
@@ -20,10 +20,16 @@ CarBehavior::CarBehavior(int iP = 0, int iI = 4, int iD = 8) : indP(iP), indI(iI
     rightOctoliner->setBrightness(255);
     enginePower = 25.75;
     pid = new GyverPID();
-    useStandartPID();
     pid->setDirection(REVERSE);
     pid->setpoint = 0;
     pid->setLimits(-180, 180);   //Min, max servo angles
+
+    useStandartPID();
+    
+    if (pidAddresses) {
+        takePidFromEeprom();
+    }
+    
     listners = new Vector<Subscriber*>[ListnerTypeAmount];
     mods = Vector<Module*>();
     isRunning = false;
@@ -51,7 +57,19 @@ void CarBehavior::resetPID() {
 }
 
 void CarBehavior::safePidInEeprom() {
-    
+    if (pidAddresses) {
+        EEPROM.put(pidAddresses[0], pid->Kp);
+        EEPROM.put(pidAddresses[1], pid->Ki);
+        EEPROM.put(pidAddresses[2], pid->Kd);
+    }
+}
+
+void CarBehavior::takePidFromEeprom() {
+    if (pidAddresses) {
+        EEPROM.get(pidAddresses[0], pid->Kp);
+        EEPROM.get(pidAddresses[1], pid->Ki);
+        EEPROM.get(pidAddresses[2], pid->Kd); 
+    }
 }
 
 void CarBehavior::calibrateSpeedServo() {

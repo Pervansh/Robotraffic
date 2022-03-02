@@ -14,4 +14,6 @@ namespace config {
     const uint16_t cityDifferenceEeprom = 8;
     const float fullSpeed = 75;
     const float enginePowerChangeDelta = 0.5;
+    const uint16_t carefulDrivingPidAddresses[] = {0, 4, 8};
+    const uint16_t racingPidAddresses[] = {12, 16, 20};
 }

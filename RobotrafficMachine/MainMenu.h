@@ -23,7 +23,7 @@ public:
     EnginePowerItem(MainMenu* menu)
     : MenuWindow::FloatValueItem(menu, &enginePower, config::enginePowerChangeDelta, "En. pow.") {
         enginePower = getMenu()->getSystem()->getCarBehavior()->getEnginePower();
-        updateData(); // IDK WHY IT'S GENERETING AN ERROR (now it doesn't)!!!
+        // updateData(); // IDK WHY IT'S GENERETING AN ERROR (now it doesn't)!!!
     }
 
     void onClick() {

@@ -7,10 +7,14 @@
 #include "CarModules.h"
 
 /*
+ * К вниманию:
+ * 1. Пункт главного меню, отвечающий за скорость машинки, может вызывать ошибку
+ * 
  * Проблема с отображением меню: пустой массив строк, м.б. они не сохраняются
  * Решение:
  * + 1) Создать статический массив хранения для вектора
  * + 2) Добавить setStorage в конструкторе
+ * Проблема решена
  */
 
 // #define POLIDOROS_VECTOR
@@ -27,7 +31,7 @@ float cdCoefs[16] = { 2, 1.40, 1.10, 1.0, 1.0, 1.0, 1.1, 1.1, 1.2, 1.2, 1.2, 1.2
 // float cdCoefs[16] = { 1.6, 1.3, 1.10, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.10, 1.3, 1.6, 0.0 };
 
 MainMenu* mm;
-CarBehavior* cdb = new EmptyBehavior();
+CarBehavior* cdb = new CarBehavior(config::carefulDrivingPidAddresses);
 // CarBehavior* rb = new EmptyBehavior();
 
 class ToCarefulDrivingItem : public MenuWindow::Item {
